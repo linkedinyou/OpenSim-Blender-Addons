@@ -1,3 +1,10 @@
+# Here's what's working
+# 1. Menu item  File > Import > OpenSim added.
+# 2. File selector dialog working.
+# 3. Parses some of geometry file using the Python module xml.dom.minidom.
+# 4. Makes up simple vertex and face data to add a triangle mesh.
+
+
 #Addon Information
 bl_info = {
     "name": "Import an OpenSim geometry file",
