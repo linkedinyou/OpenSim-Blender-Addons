@@ -2,7 +2,8 @@
 # 1. Menu item  File > Import > OpenSim added.
 # 2. File selector dialog working.
 # 3. Parses the vertices.
-# 4. Makes up face data to add a triangle mesh.
+# 4. Parses the polygon connectivity as long as the polygons are triangles.
+# 5. Displays the bone!
 
 
 #Addon Information
@@ -65,15 +66,29 @@ class OpenSimImportGeometry(bpy.types.Operator):
                     verts.append(vertex)
                 debugfile.write(str(verts) + "\n")
         
-        # Read the faces
-        #polys = []
-        #polysNodes = pieceElements[0].getElementsByTagName("Polys")
-        #ny = len(polysNodes)
-        #debugfile.write("Found " + str(ny) + " Polys node.\n")
-        #if(ny==1):
-        #    polysDataNodes = polysNodes[0].getElementsByTagName("DataArray")
-        #    nd = len(polysDataNodes)
-        #    debugfile.write("Found " + str(nd) + " DataArray nodes in element Polys.\n")
+        # Read the faces (polygon connectivity)
+        polys = []
+        polysNodes = pieceElements[0].getElementsByTagName("Polys")
+        ny = len(polysNodes)
+        debugfile.write("Found " + str(ny) + " Polys node.\n")
+        if(ny==1):
+            polysDataNodes = polysNodes[0].getElementsByTagName("DataArray")
+            nd = len(polysDataNodes)
+            debugfile.write("Found " + str(nd) + " DataArray nodes in element Polys.\n")
+            for elemt in polysDataNodes:
+                name = elemt.getAttribute("Name")
+                if(name=="connectivity"):
+                    debugfile.write("Found the connectivity DataArray.\n")
+                    polysStr = elemt.firstChild.data
+                    polysStrSplit = polysStr.split()
+                    np = len(polysStrSplit)
+                    for i in range(0,np,3):
+                        vi = int(polysStrSplit[i])
+                        vj = int(polysStrSplit[i+1])
+                        vk = int(polysStrSplit[i+2])
+                        poly = (vi,vj,vk)
+                        polys.append(poly)
+                    debugfile.write(str(polys) + "\n")
         
         
 #        for child in children:
@@ -86,19 +101,19 @@ class OpenSimImportGeometry(bpy.types.Operator):
 #                debugfile.write("Found Polys node.\n")
 
         # Create the geometry
-        faces = [(0,1,2)]
+        faces = [(0,1,2), (3,1,0)]
         mesh = bpy.data.meshes.new("Triangle")
         geometry = bpy.data.objects.new("Triangle",mesh)
         geometry.location = context.scene.cursor_location
         context.scene.objects.link(geometry)
-        mesh.from_pydata(verts,[],faces)
+        mesh.from_pydata(verts,[],polys)
         mesh.update(calc_edges=True)
         
         # Close the debug file
         debugfile.write("Geometry has " + NumberOfPoints + " vertices and " + NumberOfFaces + " faces.\n")
         debugfile.write("verts = " + str(verts))
         debugfile.write("\n")
-        debugfile.write("polys = " + str(faces))
+        debugfile.write("polys = " + str(polys))
         #debugfile.write("\n")
         debugfile.close
 
