@@ -4,6 +4,9 @@
 # 3. Parses the vertices.
 # 4. Parses the polygon connectivity as long as the polygons are triangles.
 # 5. Displays the bone!
+#
+# Bugs:
+# 1. Script fails if no object is selected.
 
 
 #Addon Information
@@ -82,6 +85,7 @@ class OpenSimImportGeometry(bpy.types.Operator):
                     polysStr = elemt.firstChild.data
                     polysStrSplit = polysStr.split()
                     np = len(polysStrSplit)
+                    # Assuming the polygon is a triangle.
                     for i in range(0,np,3):
                         vi = int(polysStrSplit[i])
                         vj = int(polysStrSplit[i+1])
@@ -90,31 +94,16 @@ class OpenSimImportGeometry(bpy.types.Operator):
                         polys.append(poly)
                     debugfile.write(str(polys) + "\n")
         
-        
-#        for child in children:
-#            if(child.nodeName == "Points"):
-#                debugfile.write("Found Points node.\n")
-#                pointsData = child.childNodes
-#                for data in pointsData:
-#                    debugfile.write("Found " + data.nodeName + "\n")
-#            if(child.nodeName == "Polys"):
-#                debugfile.write("Found Polys node.\n")
-
         # Create the geometry
         faces = [(0,1,2), (3,1,0)]
-        mesh = bpy.data.meshes.new("Triangle")
-        geometry = bpy.data.objects.new("Triangle",mesh)
+        mesh = bpy.data.meshes.new("OpenSimGeometry")
+        geometry = bpy.data.objects.new("OpenSimGeometry",mesh)
         geometry.location = context.scene.cursor_location
         context.scene.objects.link(geometry)
         mesh.from_pydata(verts,[],polys)
         mesh.update(calc_edges=True)
-        
+         
         # Close the debug file
-        debugfile.write("Geometry has " + NumberOfPoints + " vertices and " + NumberOfFaces + " faces.\n")
-        debugfile.write("verts = " + str(verts))
-        debugfile.write("\n")
-        debugfile.write("polys = " + str(polys))
-        #debugfile.write("\n")
         debugfile.close
 
         return {'FINISHED'}
