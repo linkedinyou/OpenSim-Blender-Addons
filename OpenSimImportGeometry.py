@@ -1,8 +1,8 @@
 # Here's what's working
 # 1. Menu item  File > Import > OpenSim added.
 # 2. File selector dialog working.
-# 3. Parses some of geometry file using the Python module xml.dom.minidom.
-# 4. Makes up simple vertex and face data to add a triangle mesh.
+# 3. Parses the vertices.
+# 4. Makes up face data to add a triangle mesh.
 
 
 #Addon Information
@@ -43,18 +43,49 @@ class OpenSimImportGeometry(bpy.types.Operator):
         debugfile.write("root name = " + dom.documentElement.tagName + "\n")
        
         # Read the vertices
-        children = pieceElements[0].childNodes
-        for child in children:
-            if(child.nodeName == "Points"):
-                debugfile.write("Found Points node.\n")
-                pointsData = child.childNodes
-                for data in pointsData:
-                    debugfile.write("Found " + data.nodeName + "\n")
-            if(child.nodeName == "Polys"):
-                debugfile.write("Found Polys node.\n")
+        verts = []
+        pointsNodes = pieceElements[0].getElementsByTagName("Points")
+        np = len(pointsNodes)
+        debugfile.write("Found " + str(np) + " Points node.\n")
+        if(np==1):
+            pointsDataNode = pointsNodes[0].getElementsByTagName("DataArray")
+            nd = len(pointsDataNode)
+            debugfile.write("Found " + str(nd) + " DataArray node.\n")
+            if(nd==1):
+                # vertsStr is a string that needs to be parsed for the vertices
+                vertsStr = pointsDataNode[0].firstChild.data
+                vertsStrSplit = vertsStr.split()
+                nv = len(vertsStrSplit)
+                debugfile.write("length of vertsStrSplit is " + str(nv) + "\n")
+                for i in range(0,nv,3):
+                    x = float(vertsStrSplit[i])
+                    y = float(vertsStrSplit[i+1])
+                    z = float(vertsStrSplit[i+2])
+                    vertex = (x,y,z)
+                    verts.append(vertex)
+                debugfile.write(str(verts) + "\n")
+        
+        # Read the faces
+        #polys = []
+        #polysNodes = pieceElements[0].getElementsByTagName("Polys")
+        #ny = len(polysNodes)
+        #debugfile.write("Found " + str(ny) + " Polys node.\n")
+        #if(ny==1):
+        #    polysDataNodes = polysNodes[0].getElementsByTagName("DataArray")
+        #    nd = len(polysDataNodes)
+        #    debugfile.write("Found " + str(nd) + " DataArray nodes in element Polys.\n")
+        
+        
+#        for child in children:
+#            if(child.nodeName == "Points"):
+#                debugfile.write("Found Points node.\n")
+#                pointsData = child.childNodes
+#                for data in pointsData:
+#                    debugfile.write("Found " + data.nodeName + "\n")
+#            if(child.nodeName == "Polys"):
+#                debugfile.write("Found Polys node.\n")
 
         # Create the geometry
-        verts = [(1,0,0), (-1,0,0), (0,1,0)]
         faces = [(0,1,2)]
         mesh = bpy.data.meshes.new("Triangle")
         geometry = bpy.data.objects.new("Triangle",mesh)
