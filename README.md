@@ -14,4 +14,4 @@ To install a .py file as an addon:
 
 When you install the addon, it will appear under the category "OpenSim" in the Add-ons tab (see column of categories on the left).  To make an addon active, you need to click the checkbox on the far right of the addon (if it is not checked).
 
-Note that addons are in early development not necessarily functional at this time.
+Note that addons are in early development at this time and not necessarily functional.
