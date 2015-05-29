@@ -81,17 +81,28 @@ class OpenSimImportGeometry(bpy.types.Operator):
             for elemt in polysDataNodes:
                 name = elemt.getAttribute("Name")
                 if(name=="connectivity"):
+                    poly = []
                     debugfile.write("Found the connectivity DataArray.\n")
                     polysStr = elemt.firstChild.data
-                    polysStrSplit = polysStr.split()
-                    np = len(polysStrSplit)
-                    # Assuming the polygon is a triangle.
-                    for i in range(0,np,3):
-                        vi = int(polysStrSplit[i])
-                        vj = int(polysStrSplit[i+1])
-                        vk = int(polysStrSplit[i+2])
-                        poly = (vi,vj,vk)
-                        polys.append(poly)
+                    polysStrArray = polysStr.split("\n")
+                    np = len(polysStrArray)
+                    debugfile.write("Found " + str(np) + " polygons.\n")
+                    
+                    # Loop over the number of polygons
+                    for i in range(0,np):
+                        indexStrArray = polysStrArray[i].split()
+                        nj = len(indexStrArray)
+                        debugfile.write("Found " + str(nj) + " indices in polygon " + str(i) + ".\n")
+                        if(nj<3):
+                            continue # The minimum number of vertices is in a polygon is 3
+      
+                        # Form the polygon as an array of integers
+                        poly.clear()
+                        for j in range(0,nj):
+                            poly.append( int(indexStrArray[j]) )
+
+                        # Append the polygon to the array of polygons
+                        polys.append(tuple(poly))
                     debugfile.write(str(polys) + "\n")
         
         # Create the geometry
