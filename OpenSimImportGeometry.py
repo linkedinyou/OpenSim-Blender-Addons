@@ -34,10 +34,20 @@ class OpenSimImportGeometry(bpy.types.Operator):
 
 	# Open and parse the geometry file, then add the geometry as a mesh.
     def execute(self, context):
+        
         # Open a debug file
         debugfilename = self.filepath + ".debug.txt"
         debugfile = open(debugfilename,'w')
         debugfile.write(debugfilename + "\n")
+        
+        # Get the file name
+        filepathArray = self.filepath.split("\\")
+        filepathDepth = len(filepathArray)
+        filename = ""
+        if(filepathDepth>0):
+            filename = filepathArray[filepathDepth-1]
+        debugfile.write("File path has a depth of " + str(filepathDepth) + ".\n")
+        debugfile.write("Geometry file = " + filename + "\n")
          
         # Parse the xml geometry file
         dom = xml.dom.minidom.parse(self.filepath)
@@ -107,8 +117,8 @@ class OpenSimImportGeometry(bpy.types.Operator):
         
         # Create the geometry
         faces = [(0,1,2), (3,1,0)]
-        mesh = bpy.data.meshes.new("OpenSimGeometry")
-        geometry = bpy.data.objects.new("OpenSimGeometry",mesh)
+        mesh = bpy.data.meshes.new(filename)
+        geometry = bpy.data.objects.new(filename,mesh)
         geometry.location = context.scene.cursor_location
         context.scene.objects.link(geometry)
         mesh.from_pydata(verts,[],polys)
