@@ -1,3 +1,4 @@
+# From   http://wiki.xentax.com/index.php?title=Blender_Import_Guide
 bl_info = {
     "name": "Name of the add-on",
     "author": "Name of the author of the add-on, some of these are optional",
