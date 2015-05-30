@@ -25,9 +25,9 @@ class IMPORT_OT_OpenSimGeometry(bpy.types.Operator, ImportHelper):
     def execute(self, context):
         
         # Open a debug file
-        debugfilename = self.filepath + ".debug.txt"
-        debugfile = open(debugfilename,'w')
-        debugfile.write(debugfilename + "\n")
+        #debugfilename = self.filepath + ".debug.txt"
+        #debugfile = open(debugfilename,'w')
+        #debugfile.write(debugfilename + "\n")
         
         # Form the name of the geometry based on the file name.
         filepathArray = self.filepath.split("\\")
@@ -35,8 +35,8 @@ class IMPORT_OT_OpenSimGeometry(bpy.types.Operator, ImportHelper):
         filename = ""
         if(filepathDepth>0):
             filename = filepathArray[filepathDepth-1]
-        debugfile.write("File path has a depth of " + str(filepathDepth) + ".\n")
-        debugfile.write("Geometry file = " + filename + "\n")
+        #debugfile.write("File path has a depth of " + str(filepathDepth) + ".\n")
+        #debugfile.write("Geometry file = " + filename + "\n")
         filenameArray = filename.split(".")
         if(len(filenameArray)==0):
             return {'FINISHED'}
@@ -49,55 +49,55 @@ class IMPORT_OT_OpenSimGeometry(bpy.types.Operator, ImportHelper):
         pieceElements = dom.documentElement.getElementsByTagName("Piece")
         NumberOfPoints = pieceElements[0].getAttribute("NumberOfPoints")
         NumberOfFaces = pieceElements[0].getAttribute("NumberOfPolys")
-        debugfile.write("root name = " + dom.documentElement.tagName + "\n")
+        #debugfile.write("root name = " + dom.documentElement.tagName + "\n")
        
         # Read the vertices
         verts = []
         pointsNodes = pieceElements[0].getElementsByTagName("Points")
         np = len(pointsNodes)
-        debugfile.write("Found " + str(np) + " Points node.\n")
+        #debugfile.write("Found " + str(np) + " Points node.\n")
         if(np==1):
             pointsDataNode = pointsNodes[0].getElementsByTagName("DataArray")
             nd = len(pointsDataNode)
-            debugfile.write("Found " + str(nd) + " DataArray node.\n")
+            #debugfile.write("Found " + str(nd) + " DataArray node.\n")
             if(nd==1):
                 # vertsStr is a string that needs to be parsed for the vertices
                 vertsStr = pointsDataNode[0].firstChild.data
                 vertsStrSplit = vertsStr.split()
                 nv = len(vertsStrSplit)
-                debugfile.write("length of vertsStrSplit is " + str(nv) + "\n")
+                #debugfile.write("length of vertsStrSplit is " + str(nv) + "\n")
                 for i in range(0,nv,3):
                     x = float(vertsStrSplit[i])
                     z = float(vertsStrSplit[i+1])
                     y = -float(vertsStrSplit[i+2])
                     vertex = (x,y,z)
                     verts.append(vertex)
-                debugfile.write(str(verts) + "\n")
+                #debugfile.write(str(verts) + "\n")
         
         # Read the faces (polygon connectivity)
         polys = []
         polysNodes = pieceElements[0].getElementsByTagName("Polys")
         ny = len(polysNodes)
-        debugfile.write("Found " + str(ny) + " Polys node.\n")
+        #debugfile.write("Found " + str(ny) + " Polys node.\n")
         if(ny==1):
             polysDataNodes = polysNodes[0].getElementsByTagName("DataArray")
             nd = len(polysDataNodes)
-            debugfile.write("Found " + str(nd) + " DataArray nodes in element Polys.\n")
+            #debugfile.write("Found " + str(nd) + " DataArray nodes in element Polys.\n")
             for elemt in polysDataNodes:
                 name = elemt.getAttribute("Name")
                 if(name=="connectivity"):
                     poly = []
-                    debugfile.write("Found the connectivity DataArray.\n")
+                    #debugfile.write("Found the connectivity DataArray.\n")
                     polysStr = elemt.firstChild.data
                     polysStrArray = polysStr.split("\n")
                     np = len(polysStrArray)
-                    debugfile.write("Found " + str(np) + " polygons.\n")
+                    #debugfile.write("Found " + str(np) + " polygons.\n")
                     
                     # Loop over the number of polygons
                     for i in range(0,np):
                         indexStrArray = polysStrArray[i].split()
                         nj = len(indexStrArray)
-                        debugfile.write("Found " + str(nj) + " indices in polygon " + str(i) + ".\n")
+                        #debugfile.write("Found " + str(nj) + " indices in polygon " + str(i) + ".\n")
                         if(nj<3):
                             continue # The minimum number of vertices is in a polygon is 3
       
@@ -108,7 +108,7 @@ class IMPORT_OT_OpenSimGeometry(bpy.types.Operator, ImportHelper):
 
                         # Append the polygon to the array of polygons
                         polys.append(tuple(poly))
-                    debugfile.write(str(polys) + "\n")
+                    #debugfile.write(str(polys) + "\n")
         
         # Create the geometry
         faces = [(0,1,2), (3,1,0)]
@@ -119,8 +119,9 @@ class IMPORT_OT_OpenSimGeometry(bpy.types.Operator, ImportHelper):
         mesh.from_pydata(verts,[],polys)
         mesh.update(calc_edges=True)
          
-        # Close the debug file
-        debugfile.close
+        # Cleanup
+        dom.unlink()
+        #debugfile.close
 
         return {'FINISHED'}
 
@@ -132,7 +133,7 @@ class IMPORT_OT_OpenSimGeometry(bpy.types.Operator, ImportHelper):
 
 # Function that specifies how the Operator behaves as a menu button.
 def menu_func(self, context):
-    self.layout.operator(IMPORT_OT_OpenSimGeometry.bl_idname, text="OpenSim Geometry")
+    self.layout.operator(IMPORT_OT_OpenSimGeometry.bl_idname, text="OpenSim Geometry (.vtp)")
 
 # Register the Operator
 def register():
