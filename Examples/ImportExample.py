@@ -1,3 +1,10 @@
+bl_info = {
+    "name": "Name of the add-on",
+    "author": "Name of the author of the add-on, some of these are optional",
+    "location": "File > Import > Name of script",
+    "description": "Description of the add-on",
+    "category": "Import-Export"}
+
 from bpy.props import *
 from bpy_extras.io_utils import ExportHelper, ImportHelper
 
