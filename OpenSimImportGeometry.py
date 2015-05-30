@@ -79,8 +79,8 @@ class OpenSimImportGeometry(bpy.types.Operator):
                 debugfile.write("length of vertsStrSplit is " + str(nv) + "\n")
                 for i in range(0,nv,3):
                     x = float(vertsStrSplit[i])
-                    y = float(vertsStrSplit[i+1])
-                    z = float(vertsStrSplit[i+2])
+                    z = float(vertsStrSplit[i+1])
+                    y = -float(vertsStrSplit[i+2])
                     vertex = (x,y,z)
                     verts.append(vertex)
                 debugfile.write(str(verts) + "\n")
@@ -143,27 +143,27 @@ class OpenSimImportGeometry(bpy.types.Operator):
 
 # Register the Operator
 # Uncomment when running as an AddOn
-#def register():
-#    bpy.utils.register_class(OpenSimImportGeometry)
+def register():
+    bpy.utils.register_class(OpenSimImportGeometry)
 
 # Unregister the Operator
 # Uncomment when running as an AddOn
-#def unregister():
-#    bpy.utils.unregister_class(OpenSimImportGeometry)
+def unregister():
+    bpy.utils.unregister_class(OpenSimImportGeometry)
 
 
 # Function that specifies how the Operator behaves as a menu button.
 def menu_func(self, context):
-    self.layout.operator_context = 'INVOKE_DEFAULT'
+    #self.layout.operator_context = 'INVOKE_DEFAULT'
     self.layout.operator(OpenSimImportGeometry.bl_idname, text="OpenSim Geometry")
 
 # Add a button to the File > Import menu
 # Comment out the register line when running as an AddOn.
-bpy.utils.register_class(OpenSimImportGeometry)
+#bpy.utils.register_class(OpenSimImportGeometry)
 bpy.types.INFO_MT_file_import.append(menu_func)
 
 
 # Test call.
 # The following line was used during the prototyping of the script.
 # It should be commented out once OpenSimImportGeometry is included as a Blender Addon.
-bpy.ops.opensim.import_geometry('INVOKE_DEFAULT')
+#bpy.ops.opensim.import_geometry('INVOKE_DEFAULT')
