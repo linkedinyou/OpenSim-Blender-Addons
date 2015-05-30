@@ -1,36 +1,25 @@
-# Here's what's working
-# 1. Menu item  File > Import > OpenSim added.
-# 2. File selector dialog working.
-# 3. Parses the vertices.
-# 4. Parses the polygon connectivity as long as the polygons are triangles.
-# 5. Displays the bone!
-#
-# Bugs:
-# 1. Script fails if no object is selected.
-
-
-#Addon Information
+# Addon Information
 bl_info = {
     "name": "Import an OpenSim geometry file",
-    "category": "OpenSim",
-}
+	"author": "Clay Anderson",
+	"location": "File > Import > OpenSim Geometry",
+	"description": "Imports an OpenSim geometry file",
+    "category": "OpenSim"}
 
 import xml.dom.minidom
 import bpy
+from bpy.props import *
+from bpy_extras.io_utils import ExportHelper, ImportHelper
 
 # Operator for importing OpenSim geometry files
-class OpenSimImportGeometry(bpy.types.Operator):
-    """Import an OpenSim geometry file"""
-    bl_idname = "opensim.import_geometry"
-    bl_label = "Import Geometry"
-    bl_options = {'REGISTER'}
+class IMPORT_OT_OpenSimGeometry(bpy.types.Operator, ImportHelper):
+    bl_idname = "import_scene.opensim_geometry"
+    bl_description = "Import an OpenSim geometry file"
+    bl_label = "Import OpenSim Geometry"
+    filename_ext = ".vtp"
+    filter_glob = StringProperty(default="*.vtp", options={'HIDDEN'})
 
-	# Member variables
-    filepath = bpy.props.StringProperty(subtype="FILE_PATH")
-
-    @classmethod
-    def poll(cls, context):
-        return context.object is not None
+    filepath = StringProperty(name="File Path", description="Filepath used for importing OpenSim geometry.", maxlen=1024, default="")
 
 	# Open and parse the geometry file, then add the geometry as a mesh.
     def execute(self, context):
@@ -141,29 +130,20 @@ class OpenSimImportGeometry(bpy.types.Operator):
         context.window_manager.fileselect_add(self)
         return {'RUNNING_MODAL'}
 
-# Register the Operator
-# Uncomment when running as an AddOn
-def register():
-    bpy.utils.register_class(OpenSimImportGeometry)
-
-# Unregister the Operator
-# Uncomment when running as an AddOn
-def unregister():
-    bpy.utils.unregister_class(OpenSimImportGeometry)
-
-
 # Function that specifies how the Operator behaves as a menu button.
 def menu_func(self, context):
-    #self.layout.operator_context = 'INVOKE_DEFAULT'
-    self.layout.operator(OpenSimImportGeometry.bl_idname, text="OpenSim Geometry")
+    self.layout.operator(IMPORT_OT_OpenSimGeometry.bl_idname, text="OpenSim Geometry")
 
-# Add a button to the File > Import menu
-# Comment out the register line when running as an AddOn.
-#bpy.utils.register_class(OpenSimImportGeometry)
-bpy.types.INFO_MT_file_import.append(menu_func)
+# Register the Operator
+def register():
+    bpy.utils.register_module(__name__)
+    bpy.types.INFO_MT_file_import.append(menu_func)
 
+# Unregister the Operator
+def unregister():
+    bpy.utils.unregister_module(__name__)
+    bpy.types.INFO_MT_file_import.remove(menu_func)
 
-# Test call.
-# The following line was used during the prototyping of the script.
-# It should be commented out once OpenSimImportGeometry is included as a Blender Addon.
-#bpy.ops.opensim.import_geometry('INVOKE_DEFAULT')
+# Entry point
+if __name__ == "__main__":
+    register()
